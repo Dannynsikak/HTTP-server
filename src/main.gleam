@@ -1,5 +1,5 @@
 import gleam/io
-
+import gleam/bytes_builder
 import gleam/erlang/process
 import gleam/option.{None}
 import gleam/otp/actor
@@ -16,7 +16,9 @@ pub fn main() {
   // You can use print statements as follows for debugging, they'll be visible when running tests.
   io.println("Logs from your program will appear here!")
   let assert Ok(_) =
-    glisten.handler(fn(_conn) { #(Nil, None) }, fn(_msg, state, _conn) {
+    glisten.handler(fn(_conn) { #(Nil, None) }, fn(_msg, state, conn) {
+      let asser Ok(_) =
+        glisten.send(conn, bytes_builder.from_string("HTTP/1.1 200 OK\r\n\r\n"))
       io.println("Received message!")
       actor.continue(state)
     })
