@@ -37,7 +37,7 @@ pub fn main() {
 // Function to handle HTTP requests
 fn handle_request(msg: BitArray) -> String {
   case msg {
-    <<"GET /":utf8, _rest:bits>> -> {
+    <<"GET / HTTP/1.1\r\n":utf8, _rest:bits>> -> {
       "HTTP/1.1 200 OK\r\n\r\n"
     }
     _ -> {
