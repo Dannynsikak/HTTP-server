@@ -37,9 +37,19 @@ pub fn main() {
 // Function to handle HTTP requests
 fn handle_request(msg: BitArray) -> String {
   case msg {
-    <<"GET / HTTP/1.1\r\n":utf8, _rest:bits>> -> {
-      "HTTP/1.1 200 OK\r\n\r\n"
+    // Handle the echo/{str} request
+    <<"GET /echo/":utf8, _rest:bits>> -> {
+      // convert the rest of the bits (the string) to a UTF-8 string
+      let str = string.from_bits(rest)
+
+      // Construct the response body with the string
+      let body = str
+      // calculate the content length
+      let content_length = string.length(body)
+      // Construct the full response 
+      "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: "<> string.from_int(content_length) <>  "\r\n\r\n" <> body
     }
+    // Default case for other requests
     _ -> {
       "HTTP/1.1 404 Not Found\r\n\r\n"
     }
