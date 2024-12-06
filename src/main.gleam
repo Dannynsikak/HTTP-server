@@ -18,7 +18,7 @@ pub fn main() {
   io.println("Logs from your program will appear here!")
   let assert Ok(_) =
     glisten.handler(fn(_conn) { #(Nil, None) }, fn(_msg, state, conn) {
-      let asser Ok(_) =
+      let assert Ok(_) =
         glisten.send(conn, bytes_builder.from_string("HTTP/1.1 200 OK\r\n\r\n"))
       io.println("Received message!")
       actor.continue(state)
