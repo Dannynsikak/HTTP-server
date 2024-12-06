@@ -1,28 +1,47 @@
 import gleam/io
-import gleam/bytes_builder
+import gleam/bytes_builder as bb
 import gleam/erlang/process
 import gleam/option.{None}
 import gleam/otp/actor
-import glisten
-
+import gleam/string
+import glisten.{Packet}
 
 pub fn main() {
-  // Ensures gleam doesn't complain about unused imports in stage 1 (feel free to remove this!)
-  let _ = glisten.handler
-  let _ = glisten.serve
-  let _ = process.sleep_forever
-  let _ = actor.continue
-  let _ = None
+  // Start the HTTP server
+  io.println("Starting HTTP server...")
 
-  // You can use print statements as follows for debugging, they'll be visible when running tests.
-  io.println("Logs from your program will appear here!")
   let assert Ok(_) =
-    glisten.handler(fn(_conn) { #(Nil, None) }, fn(_msg, state, conn) {
-      let assert Ok(_) =
-        glisten.send(conn, bytes_builder.from_string("HTTP/1.1 200 OK\r\n\r\n"))
-      io.println("Received message!")
-      actor.continue(state)
-    })
+    glisten.handler(
+      fn(_conn) { #(Nil, None) },
+      fn(msg, state, conn) {
+        // Parse the incoming message
+        let assert Packet(bit_array) = msg
+        io.println("Received message: " <> string.inspect(bit_array))
+
+        // Process the request and generate a response
+        let response = handle_request(bit_array)
+
+        // Send the response back
+        let assert Ok(_) = glisten.send(conn, bb.from_string(response))
+
+        // Continue processing other messages
+        actor.continue(state)
+      }
+    )
     |> glisten.serve(4221)
+
+  // Keep the process alive
   process.sleep_forever()
+}
+
+// Function to handle HTTP requests
+fn handle_request(msg: BitArray) -> String {
+  case msg {
+    <<"GET /":utf8, _rest:bits>> -> {
+      "HTTP/1.1 200 OK\r\n\r\n"
+    }
+    _ -> {
+      "HTTP/1.1 404 Not Found\r\n\r\n"
+    }
+  }
 }
