@@ -35,29 +35,44 @@ pub fn main() {
 
 
 // Function to handle HTTP requests
-fn handle_request(data: BitArray) {
-  let assert Ok(data) = bit_array.to_string(data)
-  let values = string.split(data, "\r\n")
-  let assert Ok(body) = list.first(values)
-  case string.split(body, " ") {
+fn handle_request(request: BitArray) {
+  let assert Ok(request_string) = bit_array.to_string(request)
+  // Split the request into headers and body
+  let assert [request_and_headers, _body] = string.split(request_string, "\r\n\r\n")
+   // Split headers into individual lines
+  let assert [request_line, ..header_lines] =
+    string.split(request_and_headers, "\r\n")
+   // Match the request line
+  case string.split(request_line, " ") {
+    // Handle /echo/{value} endpoint
     ["GET", "/echo/" <> value, _] -> {
-      string.join(
-        [
-          "HTTP/1.1 200 OK",
-          "Content-Type: text/plain",
-          "Content-Length: " <> int.to_string(string.length(value)),
-          "",
-          value,
-        ],
-        with: "\r\n",
-      )
+      build_plain_response(value) 
     }
+    // Handle /user-agent endpoint
+    ["GET", "/user-agent", _] -> {
+      let assert Ok("User-Agent: " <> user_agent) =
+        list.find(header_lines, fn(header) {
+          string.starts_with(header, "User-Agent:")
+        })
+      build_plain_response(user_agent)
+    }
+    // Handle the root endpoint
     ["GET", "/", _] -> {
-      "HTTP/1.1 200 OK\r\n\r\n"
+      build_plain_response("")
     }
-    _ -> {
-      "HTTP/1.1 404 Not Found\r\n\r\n"
-    }
+    // Handle all other paths with a 404 response
+    _ -> "HTTP/1.1 404 Not Found\r\n\r\n"
   }
+}
+// Helper function to build a plain text HTTP response
+fn build_plain_response(body: String) -> String {
+  [
+    "HTTP/1.1 200 OK",
+    "Content-Type: text/plain",
+    "Content-Length: " <> int.to_string(string.length(body)),
+    "",
+    body,
+  ]
+  |> string.join("\r\n")
 }
 
