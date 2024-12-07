@@ -35,6 +35,12 @@ pub fn main() {
   process.sleep_forever()
 }
 
+type StatusCode {
+  StatusOk
+  Created
+  NotFound
+}
+
 type Args {
   Args(directory: option.Option(String))
 }
@@ -50,7 +56,7 @@ fn load_args() -> Args {
 fn handle_request(request: BitArray, args: Args) {
   let assert Ok(request_string) = bit_array.to_string(request)
   // Split the request into headers and body
-  let assert [request_and_headers, _body] = string.split(request_string, "\r\n\r\n")
+  let assert [request_and_headers, body] = string.split(request_string, "\r\n\r\n")
    // Split headers into individual lines
   let assert [request_line, ..header_lines] =
     string.split(request_and_headers, "\r\n")
@@ -58,7 +64,7 @@ fn handle_request(request: BitArray, args: Args) {
   case string.split(request_line, " ") {
     // Handle /echo/{value} endpoint
     ["GET", "/echo/" <> value, _] -> {
-      build_response(value, "text/plain") 
+      build_response(value, StatusOk, "text/plain") 
     }
     // Handle /user-agent endpoint
     ["GET", "/user-agent", _] -> {
@@ -66,7 +72,7 @@ fn handle_request(request: BitArray, args: Args) {
         list.find(header_lines, fn(header) {
           string.starts_with(header, "User-Agent:")
         })
-      build_response(user_agent,"text/plain")
+      build_response(user_agent, StatusOk, "text/plain")
     }
     // Handle /file endpoint
     ["GET", "/files/" <> filename, _] -> {
@@ -75,7 +81,20 @@ fn handle_request(request: BitArray, args: Args) {
           let path = directory <> filename
           case simplifile.read(path) {
             Ok(file_content) ->
-              build_response(file_content, "application/octet-stream")
+              build_response(file_content,StatusOk, "application/octet-stream")
+            Error(_) -> build_404()
+          }
+        }
+        _ -> build_404()
+      }
+    }
+    // Handle the post endpoint
+    ["POST", "/files/" <> filename, _] -> {
+      case args.directory {
+        option.Some(directory) -> {
+          let path = directory <> filename
+          case simplifile.write(path, body) {
+            Ok(_) -> build_response("", Created, "text/plain")
             Error(_) -> build_404()
           }
         }
@@ -84,16 +103,16 @@ fn handle_request(request: BitArray, args: Args) {
     }
     // Handle the root endpoint
     ["GET", "/", _] -> {
-      build_response("", "text/plain")
+      build_response("", StatusOk, "text/plain")
     }
     // Handle all other paths with a 404 response
     _ -> build_404()
   }
 }
 // Helper function to build a plain text HTTP response
-fn build_response(body: String, content_type: String) -> String {
+fn build_response(body: String, status_code: StatusCode, content_type: String) -> String {
   [
-    "HTTP/1.1 200 OK",
+    response_line(status_code),
     "Content-Type: " <> content_type,
     "Content-Length: " <> int.to_string(string.length(body)),
     "",
@@ -101,8 +120,18 @@ fn build_response(body: String, content_type: String) -> String {
   ]
   |> string.join("\r\n")
 }
-
+// function to handle error
 fn build_404() -> String {
-  "HTTP/1.1 404 Not Found\r\n\r\n"
+  response_line(NotFound) <> "\r\n\r\n"
 }
+
+// function to handle response_line
+fn response_line(status_code: StatusCode) -> String {
+  case status_code {
+    StatusOk -> "HTTP/1.1 200 OK"
+    Created -> "HTTP/1.1 201 Created"
+    NotFound -> "HTTP/1.1 404 Not Found"
+  }
+}
+
 
