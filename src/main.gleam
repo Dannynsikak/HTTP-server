@@ -155,7 +155,7 @@ fn append_content_encoding(
   request_headers: Headers,
 ) {
   case request_headers {
-    Headers(accept_encoding: Some("gzig"), ..) ->
+    Headers(accept_encoding: Some("gzip"), ..) ->
       list.append(response_headers, ["Content-Encoding: gzip"])
     _ -> response_headers
   }
