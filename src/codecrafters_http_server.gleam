@@ -1,5 +1,4 @@
 import gleam/erlang/process
-import gleam/int
 import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -21,7 +20,7 @@ pub fn main() {
   let _ = None
   let args = load_args()
   // You can use print statements as follows for debugging, they'll be visible when running tests.
-  io.println("Logs from your program will appear here!")
+  io.println("Starting the server on port 4221...")
   
   let assert Ok(_) =
     glisten.handler(fn(_conn) { #(Nil, None) }, fn(msg, state, conn) {
@@ -50,13 +49,18 @@ type Args {
 }
 
 fn load_args() -> Args {
+  io.println("Parsing arguments...")
   case argv.load().arguments {
     ["--directory", directory] -> Args(option.Some(directory))
-    _ -> Args(option.None)
+    _ -> {
+      io.println("No directory argument provided.")
+      Args(option.None)
+    }
   }
 }
 
 fn parse_headers(header_lines: List(String)) -> Headers {
+  io.println("Parsing headers...")
   let user_agent = case
     list.find(header_lines, fn(header) {
       string.starts_with(header, "User-Agent:")
@@ -141,10 +145,9 @@ fn build_response(body: String, status_code: StatusCode, content_type: String, r
   [
     response_line(status_code),
     "Content-Type: " <> content_type,
-    "Content-Length: " <> int.to_string(string.length(body)),
   ]
   |> append_content_encoding(request_headers)
-  |> list.append(["", body])
+  |> list.append([" ", body])
   |> io.debug
   |> string.join("\r\n")
 }
