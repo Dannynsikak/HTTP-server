@@ -147,9 +147,9 @@ fn build_response(body: String, status_code: StatusCode, content_type: String, r
     "Content-Type: " <> content_type,
   ]
   |> append_content_encoding(request_headers)
-  |> list.append([" ", body])
-  |> io.debug
+  |> list.append([""])
   |> string.join("\r\n")
+  <> "\r\n" <> body
 }
 
 // function to handle content Encoding
