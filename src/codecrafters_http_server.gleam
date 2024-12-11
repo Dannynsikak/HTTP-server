@@ -1,4 +1,5 @@
 import gleam/erlang/process
+import gleam/int
 import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -82,6 +83,75 @@ fn parse_headers(header_lines: List(String)) -> Headers {
   Headers(user_agent: user_agent, accept_encoding: accept_encoding)
 }
 
+// Helper function to parse multipart form data
+// Helper function to parse multipart form data
+fn parse_multipart_form_data(body: BitArray) -> Result(BitArray, String) {
+  // Convert body from BitArray to string for easier manipulation
+  let assert Ok(body_string) = bit_array.to_string(body)
+  
+  // Extract the boundary from the Content-Type header
+  let boundary = case string.split(body_string, "\r\n") {
+    [headers_line | _] -> extract_boundary(headers_line)
+    _ -> ""
+  }
+
+  // If no boundary is found, return an error
+  case boundary {
+    "" -> Error("Boundary not found in Content-Type header")
+    _ -> {
+      // Split the body by the boundary
+      let parts = string.split(body_string, "--" <> boundary)
+
+      // Process each part
+      let result = parse_parts(parts)
+
+      // Return the parsed data
+      case result {
+        Ok(parsed_data) -> Ok(parsed_data)
+        Error(msg) -> Error(msg)
+      }
+    }
+  }
+}
+
+// Helper function to extract the boundary from the Content-Type header
+fn extract_boundary(header: String) -> String {
+  case string.split(header, "boundary=") {
+    [_, boundary] -> boundary
+    _ -> ""
+  }
+}
+
+// Helper function to parse each part of the multipart body
+fn parse_parts(parts: List(String)) -> Result(BitArray, String) {
+  // Loop through each part, extracting headers and body
+  let part_data = list.map(parts, fn(part) {
+    case string.split(part, "\r\n\r\n") {
+      [header_line, body] -> {
+        let headers = parse_headers(header_line)
+        case headers {
+          Ok(parsed_headers) -> {
+            case string.contains(parsed_headers, "Content-Disposition: form-data") {
+              True -> Ok(body) // Extract file content
+              False -> Error("Invalid part")
+            }
+          }
+          _ -> Error("Failed to parse headers")
+        }
+      }
+      _ -> Error("Invalid part format")
+    }
+  })
+  
+  // Combine all the parts into a single BitArray (you can modify this logic based on your needs)
+  case list.filter(part_data, fn(data) { data != Error }) {
+    Ok(body_parts) -> Ok(list.concat(body_parts))
+    _ -> Error("Failed to parse multipart data")
+  }
+}
+
+
+
 // Function to handle HTTP requests
 fn handle_request(request: BitArray, args: Args) {
   let assert Ok(request_string) = bit_array.to_string(request)
@@ -121,17 +191,22 @@ fn handle_request(request: BitArray, args: Args) {
     }
     // Handle the post endpoint
     ["POST", "/files/" <> filename, _] -> {
-      case args.directory {
-        option.Some(directory) -> {
-          let path = directory <> filename
-          case simplifile.write(path, body) {
+  case args.directory {
+    option.Some(directory) -> {
+      let path = directory <> filename
+      // Handle the multipart form data here
+      case parse_multipart_form_data(body) {
+        Ok(file_content) -> 
+          case simplifile.write(path, file_content) {
             Ok(_) -> build_response("", Created, "text/plain", headers)
             Error(_) -> build_404()
           }
-        }
-        _ -> build_404()
+        Error(_) -> build_404()
       }
     }
+    _ -> build_404()
+  }
+}
     // Handle the root endpoint
     ["GET", "/", _] -> {
       build_response("", StatusOk, "text/plain", headers)
@@ -145,11 +220,12 @@ fn build_response(body: String, status_code: StatusCode, content_type: String, r
   [
     response_line(status_code),
     "Content-Type: " <> content_type,
+    "Content-Length: " <> int.to_string(string.length(body)),
   ]
   |> append_content_encoding(request_headers)
-  |> list.append([""])
+  |> list.append([" ", body])
+  |> io.debug
   |> string.join("\r\n")
-  <> "\r\n" <> body
 }
 
 // function to handle content Encoding
