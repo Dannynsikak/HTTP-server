@@ -1,38 +1,83 @@
-[![progress-banner](https://backend.codecrafters.io/progress/http-server/9fb68d7a-37cf-4f5b-87f7-ba9f7568c6a2)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Gleam HTTP and WebSocket Server
 
-This is a starting point for Gleam solutions to the
-["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
+This project is an HTTP and WebSocket server built using [Gleam](https://gleam.run) and the [Mist](https://hex.pm/packages/mist) library. It demonstrates handling HTTP requests, WebSocket connections, file serving, and form processing.
 
-[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) is the
-protocol that powers the web. In this challenge, you'll build a HTTP/1.1 server
-that is capable of serving multiple clients.
+## Features
 
-Along the way you'll learn about TCP servers,
-[HTTP request syntax](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html),
-and more.
+- **HTTP Server**:
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+  - Serve static HTML content.
+  - Process form submissions with body parsing.
+  - Echo back request bodies with correct `Content-Type`.
 
-# Passing the first stage
+- **WebSocket Support**:
 
-The entry point for your HTTP server implementation is in `src/main.gleam`.
-Study and uncomment the relevant code, and push your changes to pass the first
-stage:
+  - Upgrade HTTP connections to WebSockets.
+  - Respond to WebSocket messages like `ping` with `pong`.
+  - Broadcast messages to WebSocket clients.
 
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
-```
+- **Dynamic File Serving**:
 
-Time to move on to the next stage!
+  - Serve files based on the request path.
+  - Dynamically determine file `Content-Type`.
 
-# Stage 2 & beyond
+- **Chunked Responses**:
 
-Note: This section is for stages 2 and beyond.
+  - Stream responses to clients in chunks with simulated delays.
 
-1. Ensure you have `gleam (1.0+)` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main.gleam`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+- **Logging**:
+
+  - Logs client request details and server activity.
+
+- **Error Handling**:
+  - Gracefully handles invalid routes and file not found errors.
+
+## Installation
+
+1. Ensure you have **Gleam** installed:
+   gleam --version
+   Install project dependencies:
+
+gleam deps download
+Compile the project:
+
+gleam build
+Running the Server
+Start the server by running the compiled executable:
+
+gleam run
+By default, the server runs on http://localhost with an automatically assigned port.
+
+## Endpoints
+
+Endpoint Description
+/ Serves a static HTML page.
+/ws WebSocket endpoint. Handles ping messages.
+/echo Echoes back the request body.
+/chunk Streams chunked responses with delays.
+/file/{path} Serves a file from the specified path.
+/form Processes form submissions with large bodies.
+WebSocket Example
+Connect to the WebSocket endpoint (/ws) using tools like websocat or any WebSocket client:
+
+websocat ws://localhost:PORT/ws
+Send "ping": The server responds with "pong".
+Send any text or binary data: The server processes and ignores it.
+File Serving Example
+Request a file:
+curl http://localhost:PORT/file/path/to/file.txt
+Chunked Responses Example
+Stream chunked responses:
+
+curl http://localhost:PORT/chunk
+The server streams the response "one", "two", and "three" with 2-second intervals.
+
+Logs
+Logs are displayed on the console, showing request details and server events.
+
+Future Improvements
+Add more robust error handling and validation.
+Support additional HTTP methods like POST, PUT, and DELETE.
+Implement more WebSocket features, such as broadcasting to multiple clients.
+Contributing
+Contributions are welcome! Feel free to submit an issue or pull request.
