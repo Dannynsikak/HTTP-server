@@ -49,11 +49,14 @@ pub fn main() {
         logging.Info,
         "Got a request from: " <> string.inspect(mist.get_client_info(req.body)),
       )
+
+      let user_agent = request.get_header(req, "User-Agent")
+      let accept_encoding = request.get_header(req, "Accept-Encoding")
       case request.path_segments(req) {
         [] ->
           response.new(200)
-          |> response.prepend_header("my-value", "abc")
-          |> response.prepend_header("my-value", "123")
+          |> response.prepend_header("User-Agent", result.unwrap(user_agent,"Unknown"))
+          |> response.prepend_header("Accept-Encoding", result.unwrap(accept_encoding,"Unknown"))
           |> response.set_body(mist.Bytes(bytes_tree.from_string(index)))
         ["ws"] ->
           mist.websocket(
