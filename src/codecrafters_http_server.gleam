@@ -92,7 +92,7 @@ pub fn main() {
     |> mist.new
     |> mist.bind("localhost") // bind the server to localhost
     |> mist.with_ipv6         // enable IPv6 support
-    |> mist.port(0)           // Use a random available port , you can manually assign a specific port if you want
+    |> mist.port(4000)           // changed to manually run at 4000
     |> mist.start_http        // start the HTTP server
   // keep the process alive indefinitely
   process.sleep_forever()
