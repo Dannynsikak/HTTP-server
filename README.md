@@ -53,40 +53,40 @@ Feel free to manually assign a port if needed.
 
 ## Endpoints
 
-# Endpoint Description
+- Endpoint Description
 
-/ Serves a static HTML page.
-/ws WebSocket endpoint. Handles ping messages.
-/echo Echoes back the request body.
-/chunk Streams chunked responses with delays.
-/file/{path} Serves a file from the specified path.
-/form Processes form submissions with large bodies.
+  - / Serves a static HTML page.
+  - /ws WebSocket endpoint. Handles ping messages.
+  - /echo Echoes back the request body.
+  - /chunk Streams chunked responses with delays.
+  - /file/{path} Serves a file from the specified path.
+  - /form Processes form submissions with large bodies.
 
 # WebSocket Example
-Connect to the WebSocket endpoint (/ws) using tools like Chromebrowser or any WebSocket client:
-open the Chrome browser.
+  Connect to the WebSocket endpoint (/ws) using tools like Chromebrowser or any WebSocket client:
+  open the Chrome browser.
 
-Open the Developer Tools (Ctrl + Shift + I / Cmd + Option + I).
+  Open the Developer Tools (Ctrl + Shift + I / Cmd + Option + I).
 
-Go to the Console tab.
+  Go to the Console tab.  
 
-Paste the following JavaScript code to open a WebSocket connection:
+  Paste the following JavaScript code to open a WebSocket connection:
 
-const socket = new WebSocket("ws://localhost:PORT/ws");
+  const socket = new WebSocket("ws://localhost:PORT/ws");
 
-socket.addEventListener("open", function () {
+  socket.addEventListener("open", function () {
   console.log("WebSocket connection established.");
   socket.send("ping"); // Send 'ping' message to server
-});
+  });
 
-socket.addEventListener("message", function (event) {
+  socket.addEventListener("message", function (event) {
   console.log("Message from server:", event.data);
-});
+  });
 
-socket.addEventListener("close", function () {
+  socket.addEventListener("close", function () {
   console.log("WebSocket connection closed.");
-});
-Expected Behavior:
+  });
+  Expected Behavior:
 
 When connected, the console logs:
 
@@ -118,6 +118,5 @@ The server streams the response "one", "two", and "three" with 2-second interval
 Logs are displayed on the console, showing request details and server events.
 
 # Future Improvements
-Support additional HTTP methods like POST, PUT, and DELETE.
-Contributing
-Contributions are welcome! Feel free to submit an issue or pull request.
+- Support additional HTTP methods like POST, PUT, and DELETE. **Contributing**
+- Contributions are welcome! Feel free to submit an issue or  pull request.
