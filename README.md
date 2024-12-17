@@ -35,8 +35,10 @@ This project is an HTTP and WebSocket server built using [Gleam](https://gleam.r
 ## Installation
 
 1. Ensure you have **Gleam** installed:
-   gleam --version
-   Install project dependencies:
+You can the check the **Gleam Docs https://gleam.run/getting-started/installing/ ** for installation guide.
+
+gleam --version
+Install project dependencies:
 
 gleam deps download
 Compile the project:
