@@ -38,48 +38,86 @@ This project is an HTTP and WebSocket server built using [Gleam](https://gleam.r
 You can the check the **Gleam Docs https://gleam.run/getting-started/installing/ ** for installation guide.
 
 gleam --version
-Install project dependencies:
+# Install project dependencies:
 
 gleam deps download
-Compile the project:
+# Compile the project:
 
 gleam build
-Running the Server
+# Running the Server
 Start the server by running the compiled executable:
 
 gleam run
 By default, the server runs on http://localhost with an automatically assigned port.
+Feel free to manually assign a port if needed.
 
 ## Endpoints
 
-Endpoint Description
+# Endpoint Description
+
 / Serves a static HTML page.
 /ws WebSocket endpoint. Handles ping messages.
 /echo Echoes back the request body.
 /chunk Streams chunked responses with delays.
 /file/{path} Serves a file from the specified path.
 /form Processes form submissions with large bodies.
-WebSocket Example
-Connect to the WebSocket endpoint (/ws) using tools like websocat or any WebSocket client:
 
-websocat ws://localhost:PORT/ws
-Send "ping": The server responds with "pong".
-Send any text or binary data: The server processes and ignores it.
-File Serving Example
+# WebSocket Example
+Connect to the WebSocket endpoint (/ws) using tools like Chromebrowser or any WebSocket client:
+open the Chrome browser.
+
+Open the Developer Tools (Ctrl + Shift + I / Cmd + Option + I).
+
+Go to the Console tab.
+
+Paste the following JavaScript code to open a WebSocket connection:
+
+const socket = new WebSocket("ws://localhost:PORT/ws");
+
+socket.addEventListener("open", function () {
+  console.log("WebSocket connection established.");
+  socket.send("ping"); // Send 'ping' message to server
+});
+
+socket.addEventListener("message", function (event) {
+  console.log("Message from server:", event.data);
+});
+
+socket.addEventListener("close", function () {
+  console.log("WebSocket connection closed.");
+});
+Expected Behavior:
+
+When connected, the console logs:
+
+**WebSocket connection established**.
+# The server responds with:
+
+Message from server: pong
+# Send a custom message:
+
+socket.send("Hello, server!");
+The server ignores this since it doesn’t handle arbitrary messages, but it continues.
+Close the WebSocket connection:
+
+socket.close();
+# Logs:
+
+WebSocket connection closed.
+
+# File Serving Example
 Request a file:
 curl http://localhost:PORT/file/path/to/file.txt
 Chunked Responses Example
-Stream chunked responses:
+# Stream chunked responses:
 
 curl http://localhost:PORT/chunk
 The server streams the response "one", "two", and "three" with 2-second intervals.
 
-Logs
+# Logs
 Logs are displayed on the console, showing request details and server events.
 
-Future Improvements
-Add more robust error handling and validation.
+# Future Improvements
 Support additional HTTP methods like POST, PUT, and DELETE.
-Implement more WebSocket features, such as broadcasting to multiple clients.
 Contributing
 Contributions are welcome! Feel free to submit an issue or pull request.
