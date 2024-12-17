@@ -1,0 +1,5 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {},
+  "postCreateCommand": "echo 'Dev container is ready!'" // Optional: Add commands to run after container setup
+}
