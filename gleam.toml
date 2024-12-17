@@ -4,7 +4,7 @@ version = "4.0.1"
 
 licences = ["Apache-2.0"]
 description = "a misty Gleam web server"
-repository = { type = "github", user = "Dannynsikak", repo = "Http-server" }
+repository = { type = "github", user = "Dannynsikak", repo = "HTTP-server" }
 target = "erlang"
 gleam = ">= 1.4.0"
 
