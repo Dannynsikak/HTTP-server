@@ -13,8 +13,6 @@ import gleam/yielder
 import logging
 import mist.{type Connection, type ResponseData}
 
-
-
 @external(erlang, "logger", "update_primary_config")
 fn logger_update_primary_config(config: Dict(Atom, Atom)) -> Result(Nil, any)
 
@@ -140,7 +138,7 @@ fn echo_body(request: Request(Connection)) -> Response(ResponseData) {
     |> response.set_body(mist.Bytes(bytes_tree.new()))
   })
 }
-/// serves data i chunkc
+/// serves data in chunk
 fn serve_chunk(_request: Request(Connection)) -> Response(ResponseData) {
   // create an iterator that saves data with a delay
   let iter =
