@@ -49,7 +49,7 @@ Start the server by running the compiled executable:
 
 gleam run
 By default, the server runs on http://localhost:4000 with a manually assigned port(4000).
-Feel free to manually assign a port if needed.
+Feel free to make the port dynamic if needed.
 
 ## Endpoints
 
