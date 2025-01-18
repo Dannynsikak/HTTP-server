@@ -142,7 +142,9 @@ fn echo_body(request: Request(Connection)) -> Response(ResponseData) {
 fn serve_chunk(_request: Request(Connection)) -> Response(ResponseData) {
   // create an iterator that saves data with a delay
   let iter =
-    ["one", "two", "three"]
+    [
+    "owner: ofonime_nsikak45 email: nsikakdanny11@gmail.com"
+    ]
     |> yielder.from_list
     |> yielder.map(fn(data) {
       process.sleep(2000) // simulate delay between chunks
